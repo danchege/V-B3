@@ -1,0 +1,34 @@
+# Render Blueprint for V-B3 Backend
+
+services:
+  # Backend service (Node.js/Express)
+  - type: web
+    name: vib3-backend
+    env: node
+    region: singapore  # Choose a region closest to your users
+    build:
+      dockerfile: ./backend/Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: vib3-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+    plan: free
+    numInstances: 1
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+# Database (MongoDB)
+databases:
+  - name: vib3-db
+    databaseName: vib3
+    plan: free
+    ipAccessList:
+      - group: render
+    autoDeploy: true
