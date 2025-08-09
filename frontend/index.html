@@ -2,12 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Error handler for module loading
+      window.addEventListener('error', (event) => {
+        console.error('Script error:', event);
+        const root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = `
+            <div style="padding: 2rem; font-family: sans-serif;">
+              <h1>Application Error</h1>
+              <p>Failed to load the application. Please try refreshing the page.</p>
+              <p>If the problem persists, please contact support.</p>
+              <button onclick="window.location.reload()" style="padding: 8px 16px; margin-top: 1rem;">
+                Refresh Page
+              </button>
+              <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                Error details: ${event.message}
+              </div>
+            </div>
+          `;
+        }
+      }, true);
+    </script>
   </body>
 </html>
