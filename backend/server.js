@@ -32,10 +32,60 @@ app.use('/api/user', userRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Error handling middleware
+// Enhanced error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal server error', error: err.message });
+  const errorId = `err_${Date.now()}`;
+  
+  // Log the complete error for debugging
+  console.error(`\n=== [${errorId}] UNHANDLED ERROR ===`);
+  console.error('Error details:', {
+    name: err.name,
+    message: err.message,
+    code: err.code,
+    statusCode: err.statusCode || 500,
+    stack: err.stack,
+    originalError: err.originalError ? {
+      name: err.originalError.name,
+      message: err.originalError.message,
+      code: err.originalError.code,
+      stack: err.originalError.stack
+    } : null,
+    request: {
+      method: req.method,
+      url: req.originalUrl,
+      headers: req.headers,
+      body: req.body,
+      params: req.params,
+      query: req.query,
+      user: req.user || null
+    }
+  });
+  
+  // Determine the status code
+  const statusCode = err.statusCode || 500;
+  
+  // Prepare error response
+  const errorResponse = {
+    success: false,
+    message: err.message || 'Internal Server Error',
+    errorId: errorId,
+    timestamp: new Date().toISOString()
+  };
+  
+  // Add stack trace in development
+  if (process.env.NODE_ENV === 'development') {
+    errorResponse.stack = err.stack;
+    if (err.originalError) {
+      errorResponse.originalError = {
+        name: err.originalError.name,
+        message: err.originalError.message,
+        stack: err.originalError.stack
+      };
+    }
+  }
+  
+  // Send error response
+  res.status(statusCode).json(errorResponse);
 });
 
 // Health check

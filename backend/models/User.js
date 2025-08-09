@@ -1,5 +1,67 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const Chat = require('./Chat');
+
+const swipeSchema = new mongoose.Schema({
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true 
+  },
+  liked: { 
+    type: Boolean, 
+    required: true 
+  },
+  timestamp: { 
+    type: Date, 
+    default: Date.now 
+  }
+});
+
+const locationSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['Point'],
+    default: 'Point'
+  },
+  coordinates: {
+    type: [Number],
+    required: true
+  }
+});
+
+const preferencesSchema = new mongoose.Schema({
+  gender: [{
+    type: String,
+    enum: ['male', 'female', 'non-binary', 'prefer not to say'],
+    required: true
+  }],
+  lookingFor: [{
+    type: String,
+    enum: ['male', 'female', 'non-binary', 'prefer not to say'],
+    required: true
+  }],
+  distance: {
+    type: Number,
+    min: 1,
+    max: 100,
+    default: 50
+  },
+  ageRange: {
+    min: {
+      type: Number,
+      min: 18,
+      max: 120,
+      default: 18
+    },
+    max: {
+      type: Number,
+      min: 18,
+      max: 120,
+      default: 100
+    }
+  }
+});
 
 const UserSchema = new mongoose.Schema({
   name: { 
@@ -43,6 +105,7 @@ const UserSchema = new mongoose.Schema({
   }],
   photos: [{ 
     type: String,
+    default: 'https://via.placeholder.com/200',
     validate: {
       validator: function(v) {
         // Basic URL validation for photos

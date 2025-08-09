@@ -4,7 +4,30 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
-import api from '../utils/api';
+import { api, handleApiError } from '../utils/api';
+
+// Function to get coordinates from city and country using OpenStreetMap Nominatim API
+const getCoordinates = async (city, country) => {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        `${city}, ${country}`
+      )}&limit=1`
+    );
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      return {
+        type: 'Point',
+        coordinates: [parseFloat(data[0].lon), parseFloat(data[0].lat)]
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting coordinates:', error);
+    return null;
+  }
+};
 
 const ProfileSetup = () => {
   const { user, updateUser } = useAuth();
@@ -36,26 +59,49 @@ const ProfileSetup = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data } = await api.get('/api/users/me');
-        if (data.data) {
+        console.log('Fetching user profile...');
+        const token = localStorage.getItem('token');
+        console.log('Using token for profile fetch:', token ? 'Token exists' : 'No token found');
+        
+        // Use the correct endpoint path
+        const response = await api.get('/users/me');
+        console.log('Profile API response:', response.data);
+        
+        if (response.data && response.data.data) {
+          const userData = response.data.data;
+          console.log('Profile data received:', userData);
+          
           setFormData(prev => ({
-            name: data.data.name || '',
-            age: data.data.age || '',
-            bio: data.data.bio || '',
-            gender: data.data.gender || '',
-            interests: data.data.interests || [],
-            photos: data.data.photos || [],
-            location: data.data.location || { city: '', country: '' },
-            preferences: data.data.preferences || {
+            name: userData.name || '',
+            age: userData.age || '',
+            bio: userData.bio || '',
+            gender: userData.gender || '',
+            interests: userData.interests || [],
+            photos: userData.photos || [],
+            location: userData.location || {
+              type: 'Point',
+              coordinates: [0, 0]
+            },
+            preferences: userData.preferences || {
               ageRange: { min: 18, max: 99 },
               distance: 50,
               gender: []
             }
           }));
         }
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-        setError('Failed to load profile data');
+      } catch (error) {
+        const apiError = handleApiError(error);
+        console.error('Error in fetchProfile:', apiError);
+        
+        // Set appropriate error message based on the error
+        let errorMessage = apiError.message || 'Failed to load profile. Please try again.';
+        
+        // If it's a 401, the interceptor will handle the redirect
+        if (apiError.status === 401) {
+          return; // Interceptor will handle the redirect
+        }
+        
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -140,14 +186,37 @@ const ProfileSetup = () => {
     setIsSubmitting(true);
 
     // Basic validation
-    if (!formData.name || !formData.age || !formData.gender) {
-      setError('Please fill in all required fields');
+    if (!formData.name || !formData.age || !formData.gender || !formData.location.city || !formData.location.country) {
+      setError('Please fill in all required fields including location');
       setIsSubmitting(false);
       return;
     }
 
+    // Add geocoding for location
     try {
-      const { data } = await api.put('/api/users/me', formData);
+      const coordinates = await getCoordinates(formData.location.city, formData.location.country);
+      if (!coordinates) {
+        throw new Error('Could not find coordinates for the provided location. Please check the city and country names.');
+      }
+
+      // Update form data with coordinates
+      const updatedFormData = {
+        ...formData,
+        location: {
+          ...formData.location,
+          type: 'Point',
+          coordinates: coordinates.coordinates
+        },
+        // Ensure preferences.gender is an array for the backend
+        preferences: {
+          ...formData.preferences,
+          gender: Array.isArray(formData.preferences.gender) 
+            ? formData.preferences.gender 
+            : [formData.preferences.gender].filter(Boolean)
+        }
+      };
+
+      const { data } = await api.put('/users/me', updatedFormData);
       
       // Update auth context with new user data
       if (updateUser) {
@@ -158,7 +227,7 @@ const ProfileSetup = () => {
       navigate('/swipe');
     } catch (err) {
       console.error('Error updating profile:', err);
-      setError(err.response?.data?.message || 'Failed to update profile');
+      setError(err.response?.data?.message || err.message || 'Failed to update profile. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -340,28 +409,30 @@ const ProfileSetup = () => {
 
               {/* Location Section */}
               <section className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Location</h2>
+                <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Location *</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
                     <input
                       type="text"
                       name="location.city"
                       value={formData.location?.city || ''}
                       onChange={handleChange}
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink focus:border-transparent"
+                      required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
                     <input
                       type="text"
                       name="location.country"
                       value={formData.location?.country || ''}
                       onChange={handleChange}
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink focus:border-transparent"
+                      required
                     />
                   </div>
                 </div>
@@ -369,7 +440,7 @@ const ProfileSetup = () => {
 
               {/* Preferences Section */}
               <section className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Preferences</h2>
+                <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Preferences *</h2>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Age Range</label>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -7,8 +7,8 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmojiPicker from '../components/EmojiPicker';
+import { api, handleApiError } from '../utils/api';
 import { sendMessage as sendMessageApi, getMessages as getMessagesApi } from '../services/chatService';
-import api from '../utils/api';
 
 const Swipe = () => {
   const { user: currentUser } = useAuth();
@@ -27,19 +27,57 @@ const Swipe = () => {
   // Fetch potential matches from the backend
   const fetchPotentialMatches = async () => {
     try {
-      const response = await api.get('/api/users/matches');
+      console.log('Fetching potential matches...');
+      setError(null);
+      
+      // Log the token being used for the request
+      const token = localStorage.getItem('token');
+      console.log('Using token:', token ? 'Token exists' : 'No token found');
+      
+      // Use the correct endpoint path
+      const response = await api.get('/match');
+      
       if (response.data.success && response.data.data) {
-        setUsers(prevUsers => {
-          // Filter out any users that are already in the current list
-          const newUsers = response.data.data.filter(
-            newUser => !prevUsers.some(user => user._id === newUser._id)
-          );
-          return [...prevUsers, ...newUsers];
-        });
+        const matches = response.data.data;
+        console.log(`Found ${matches.length} potential matches`);
+        
+        if (matches.length > 0) {
+          setUsers(prevUsers => {
+            // Filter out any users that are already in the current list
+            const newUsers = matches.filter(
+              newUser => !prevUsers.some(user => user._id === newUser._id)
+            );
+            console.log(`Adding ${newUsers.length} new matches`);
+            return [...prevUsers, ...newUsers];
+          });
+        } else {
+          const errorMsg = 'No more matches found in your area. Try adjusting your preferences.';
+          console.log(errorMsg);
+          setError(errorMsg);
+        }
+      } else {
+        throw new Error(response.data?.message || 'Failed to load potential matches');
       }
-    } catch (err) {
-      console.error('Error fetching potential matches:', err);
-      setError('Failed to load potential matches. Please try again later.');
+    } catch (error) {
+      const apiError = handleApiError(error);
+      console.error('Error in fetchPotentialMatches:', apiError);
+      
+      // Set appropriate error message based on the error
+      let errorMessage = apiError.message || 'Failed to load potential matches. Please try again later.';
+      
+      // Handle specific error cases
+      if (apiError.status === 400) {
+        errorMessage = 'Please complete your profile to see matches.';
+        console.log('Redirecting to profile setup due to incomplete profile');
+        setTimeout(() => {
+          navigate('/profile-setup');
+        }, 2000);
+      } else if (apiError.status === 401) {
+        // The interceptor will handle the redirect for 401
+        return;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
@@ -48,32 +86,40 @@ const Swipe = () => {
 
   // Handle swipe action (like/dislike)
   const handleSwipe = async (liked) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setError('Please log in to swipe');
+      return;
+    }
     
     const currentUserProfile = users[index];
+    if (!currentUserProfile || !currentUserProfile._id) {
+      setError('Invalid user profile');
+      return;
+    }
     
     try {
+      setError(null);
+      
       if (liked) {
         // If user liked the profile, check for a match
-        await api.post('/api/matches', {
+        const response = await api.post('/match/swipe', {
           targetUserId: currentUserProfile._id,
           liked: true
         });
         
-        // Check if it's a mutual like (match)
-        const matchResponse = await api.get(`/api/matches/check-match/${currentUserProfile._id}`);
-        if (matchResponse.data.isMatch) {
-          // Update the user's matches in the local state
+        if (response.data && response.data.matched) {
+          // It's a match!
           setUsers(prevUsers => {
             const updatedUsers = [...prevUsers];
             updatedUsers[index] = {
               ...updatedUsers[index],
               matches: [
-                ...(updatedUsers[index].matches || []),
+                ...(updatedUsers[index]?.matches || []),
                 {
-                  _id: matchResponse.data.matchId,
+                  _id: response.data.matchId,
                   users: [currentUser._id, currentUserProfile._id],
-                  matched: true
+                  matched: true,
+                  createdAt: new Date()
                 }
               ]
             };
@@ -83,19 +129,33 @@ const Swipe = () => {
           // Show match notification
           alert(`It's a match with ${currentUserProfile.name}!`);
         }
+      } else {
+        // Handle dislike - just log it
+        await api.post('/api/matches/swipe', {
+          targetUserId: currentUserProfile._id,
+          liked: false
+        });
       }
       
       // Move to the next profile
       if (index < users.length - 1) {
-        setIndex(index + 1);
+        setIndex(prevIndex => prevIndex + 1);
       } else {
         // If we're at the end of the list, fetch more users
         setIsLoadingMore(true);
         await fetchPotentialMatches();
+        setIndex(0); // Reset index for new batch
       }
     } catch (err) {
       console.error('Error handling swipe:', err);
-      setError('Failed to process your action. Please try again.');
+      const errorMessage = err.response?.data?.message || 
+                         'Failed to process your action. Please try again.';
+      setError(errorMessage);
+      
+      // If it's an authentication error, redirect to login
+      if (err.response?.status === 401) {
+        navigate('/login');
+      }
     }
   };
 
@@ -267,7 +327,28 @@ const Swipe = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink via-loveRed to-maroon flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <LoadingSpinner size="large" />
+      </div>
+    );
+  }
+
+  if (error && error.includes('complete your profile')) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink via-loveRed to-maroon flex flex-col items-center justify-center p-4 text-center">
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-maroon mb-4">Profile Incomplete</h2>
+          <p className="text-gray-700 mb-6">
+            {error}
+          </p>
+          <div className="flex justify-center">
+            <button
+              onClick={() => navigate('/profile-setup')}
+              className="bg-maroon text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors"
+            >
+              Complete My Profile
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
