@@ -86,6 +86,18 @@ pnpm run dev
 
 ---
 
+## Deployment
+
+### Backend (Render)
+The backend API is deployed on Render at:  
+[![Render](https://img.shields.io/badge/Render-%46E3B7A0.svg?style=for-the-badge&logo=render&logoColor=white)](https://v-b3.onrender.com/)
+
+### Frontend (Vercel)
+The frontend is deployed on Vercel at:  
+[![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://v-b3.vercel.app/)
+
+---
+
 ## Backend API Overview
 
 ### Auth

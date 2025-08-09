@@ -12,11 +12,23 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://vib3-backend.onrender.com/api/$1"
+      "dest": "https://v-b3.onrender.com/api/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      }
     }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
