@@ -2,34 +2,86 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>V!B3 - Match & Chat</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="./src/styles/error-styles.css">
+    <!-- Fallback inline styles in case external CSS fails to load -->
+    <style>
+      #error-container { display: none; padding: 2rem; margin: 0 auto; max-width: 800px; }
+      #error-details { margin: 1rem 0; padding: 1rem; background: #f7fafc; border-radius: 0.5rem; }
+      .error-button { background: #4299e1; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer; }
+      @media (max-width: 640px) { #error-container { padding: 1rem; } }
+    </style>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Error container that will be shown if JavaScript fails to load -->
+    <div id="error-container">
+      <h1>Application Error</h1>
+      <p class="error-message">Failed to load the application. Please try refreshing the page.</p>
+      <p class="error-message">If the problem persists, please contact support.</p>
+      <button class="error-button" onclick="window.location.reload()">Refresh Page</button>
+      <div id="error-details"></div>
+    </div>
+
+    <!-- Main application script -->
+    <script type="module" src="/assets/index.js"></script>
+    
+    <!-- Error handling scripts -->
     <script>
-      // Error handler for module loading
-      window.addEventListener('error', (event) => {
+      // Enhanced error handler for module loading
+      window.addEventListener('error', function(event) {
         console.error('Script error:', event);
-        const root = document.getElementById('root');
-        if (root) {
-          root.innerHTML = `
-            <div style="padding: 2rem; font-family: sans-serif;">
-              <h1>Application Error</h1>
-              <p>Failed to load the application. Please try refreshing the page.</p>
-              <p>If the problem persists, please contact support.</p>
-              <button onclick="window.location.reload()" style="padding: 8px 16px; margin-top: 1rem;">
-                Refresh Page
-              </button>
-              <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
-                Error details: ${event.message}
-              </div>
-            </div>
-          `;
+        const errorContainer = document.getElementById('error-container');
+        const errorDetails = document.getElementById('error-details');
+        
+        if (errorContainer && errorDetails) {
+          errorContainer.style.display = 'block';
+          errorDetails.textContent = [
+            'Error: ' + (event.message || 'Unknown error'),
+            'URL: ' + (event.filename || 'unknown'),
+            'Line: ' + (event.lineno || 'unknown'),
+            'Column: ' + (event.colno || 'unknown'),
+            'Error object: ' + JSON.stringify(event.error || {}, Object.getOwnPropertyNames(event.error || {})),
+            'User Agent: ' + navigator.userAgent
+          ].join('\n\n');
         }
       }, true);
+
+      // Handle unhandled promise rejections
+      window.addEventListener('unhandledrejection', function(event) {
+        console.error('Unhandled rejection:', event.reason);
+        const errorContainer = document.getElementById('error-container');
+        const errorDetails = document.getElementById('error-details');
+        
+        if (errorContainer && errorDetails) {
+          errorContainer.style.display = 'block';
+          errorDetails.textContent = [
+            'Unhandled Promise Rejection:',
+            'Reason: ' + (event.reason ? event.reason.message : 'Unknown'),
+            'Stack: ' + (event.reason ? event.reason.stack : 'No stack trace available'),
+            'User Agent: ' + navigator.userAgent
+          ].join('\n\n');
+        }
+      });
+      
+      // Show error container if JavaScript takes too long to load
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          const root = document.getElementById('root');
+          const errorContainer = document.getElementById('error-container');
+          if (root && root.children.length === 0 && errorContainer) {
+            errorContainer.style.display = 'block';
+            const details = document.getElementById('error-details');
+            if (details) {
+              details.textContent = 'The application is taking longer than expected to load. Please check your internet connection and try again.';
+            }
+          }
+        }, 5000); // 5 second timeout
+      });
     </script>
   </body>
 </html>
