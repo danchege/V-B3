@@ -8,6 +8,7 @@ export default defineConfig(({ command, mode }) => {
   return {
     plugins: [react()],
     base: isProduction ? '/' : '/',
+    publicDir: 'public',
     build: {
       outDir: 'dist',
       assetsDir: 'assets',

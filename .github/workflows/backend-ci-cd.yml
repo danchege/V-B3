@@ -1,0 +1,86 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  NODE_ENV: 'production'
+  PORT: 5000
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: test
+        options: >-
+          --health-cmd "echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: pnpm install --frozen-lockfile
+
+    - name: Run linting
+      working-directory: ./backend
+      run: pnpm lint
+
+    - name: Run tests
+      working-directory: ./backend
+      env:
+        MONGODB_URI: mongodb://test:test@localhost:27017/test?authSource=admin
+        JWT_SECRET: test-secret
+      run: pnpm test
+
+  deploy:
+    name: Deploy to Render
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Deploy to Render
+      uses: nico2che/render-deployment-action@v1.0.0
+      with:
+        renderToken: ${{ secrets.RENDER_TOKEN }}
+        serviceId: ${{ secrets.RENDER_SERVICE_ID }}
+        rootDir: ./backend
