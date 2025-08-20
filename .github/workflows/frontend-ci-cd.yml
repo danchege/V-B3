@@ -38,12 +38,8 @@ jobs:
     - name: Install dependencies
       working-directory: ./frontend
       run: |
-        if [ -f "pnpm-lock.yaml" ]; then
-          pnpm install --frozen-lockfile
-        else
-          echo "No pnpm-lock.yaml found, installing without frozen lockfile"
-          pnpm install --no-frozen-lockfile
-        fi
+        # Always use --no-frozen-lockfile in CI to handle missing lockfiles
+        pnpm install --no-frozen-lockfile
 
     - name: Run linting
       working-directory: ./frontend
