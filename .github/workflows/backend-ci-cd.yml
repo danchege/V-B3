@@ -45,11 +45,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
-        cache-dependency-path: 'backend/pnpm-lock.yaml'
         
-    - name: Install pnpm using npm
-      run: npm install -g pnpm@8
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 8
+        run_install: false
 
     - name: Install dependencies
       working-directory: ./backend
