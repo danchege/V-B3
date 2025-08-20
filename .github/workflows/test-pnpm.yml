@@ -1,0 +1,31 @@
+name: Test pnpm Installation
+
+on: [workflow_dispatch]
+
+jobs:
+  test-pnpm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Get Node.js and npm versions
+      run: |
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        
+    - name: Install pnpm using npm
+      run: |
+        npm install -g pnpm@8
+        echo "PNPM version: $(pnpm --version)"
+        echo "PNPM path: $(which pnpm)"
+        echo "PATH: $PATH"
+        
+    - name: Verify pnpm in PATH
+      run: |
+        pnpm --version
+        pnpm store path
