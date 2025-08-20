@@ -26,5 +26,26 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    'react-refresh/only-export-components': 'warn',
   },
+  overrides: [
+    // Configuration files
+    {
+      files: ['*.js', '*.cjs'],
+      env: {
+        node: true,
+      },
+      rules: {
+        'no-undef': 'off',
+      },
+    },
+    // React components
+    {
+      files: ['src/**/*.jsx'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'warn',
+      },
+    },
+  ],
 };

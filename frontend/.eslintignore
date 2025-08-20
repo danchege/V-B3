@@ -1,0 +1,14 @@
+# Configuration files
+*.config.js
+*.config.cjs
+tailwind.config.js
+postcss.config.js
+vite.config.js
+
+# Build output
+dist
+node_modules
+
+# Test files
+**/*.test.js
+**/*.spec.js
