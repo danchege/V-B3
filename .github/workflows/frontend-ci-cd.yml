@@ -27,34 +27,27 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
-
-    - name: Install pnpm using npm
-      run: npm install -g pnpm@8
-      
-    - name: Verify pnpm installation
-      run: pnpm --version
+        cache: 'npm'
 
     - name: Install dependencies
       working-directory: ./frontend
       run: |
-        pnpm install --frozen-lockfile
-
-    - name: Install dependencies
-      working-directory: ./frontend
-      run: pnpm install --frozen-lockfile
+        npm ci
 
     - name: Run linting
       working-directory: ./frontend
-      run: pnpm lint
+      run: |
+        npm run lint
 
     - name: Run tests
       working-directory: ./frontend
-      run: pnpm test --watchAll=false
+      run: |
+        npm test
 
-    - name: Build for production
+    - name: Build application
       working-directory: ./frontend
-      run: pnpm build
+      run: |
+        npm run build
       env:
         NODE_ENV: production
         VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://v-b3.onrender.com/api' }}

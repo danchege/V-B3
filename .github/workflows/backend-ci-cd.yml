@@ -45,28 +45,22 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
-
-    - name: Install pnpm using npm
-      run: npm install -g pnpm@8
-      
-    - name: Verify pnpm installation
-      run: pnpm --version
+        cache: 'npm'
 
     - name: Install dependencies
       working-directory: ./backend
-      run: pnpm install --frozen-lockfile
+      run: npm ci
 
     - name: Run linting
       working-directory: ./backend
-      run: pnpm lint
+      run: npm run lint
 
     - name: Run tests
       working-directory: ./backend
       env:
         MONGODB_URI: mongodb://test:test@localhost:27017/test?authSource=admin
         JWT_SECRET: test-secret
-      run: pnpm test
+      run: npm test
 
   deploy:
     name: Deploy to Render
