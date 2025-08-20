@@ -41,10 +41,13 @@ jobs:
         # Always use --no-frozen-lockfile in CI to handle missing lockfiles
         pnpm install --no-frozen-lockfile
 
+    - name: Install ESLint if needed
+      working-directory: ./frontend
+      run: pnpm add -D eslint
+
     - name: Run linting
       working-directory: ./frontend
-      run: |
-        pnpm run lint
+      run: pnpm run lint
 
     - name: Run tests
       working-directory: ./frontend
