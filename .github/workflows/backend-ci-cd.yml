@@ -49,9 +49,16 @@ jobs:
 
     - name: Install pnpm
       uses: pnpm/action-setup@v2
+      id: pnpm-install
       with:
         version: 8
-        run_install: false
+        run_install: true
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "PNPM_HOME=$(pnpm store path --silent)" >> $GITHUB_ENV
+        echo "$PNPM_HOME" >> $GITHUB_PATH
 
     - name: Install dependencies
       working-directory: ./backend
