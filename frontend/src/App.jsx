@@ -9,7 +9,7 @@ import Swipe from './pages/Swipe';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 
-// Commented to trigger workflow run
+// Commented to trigger workflow run - 2
 const App = () => (
   <AuthProvider>
     <Router>
