@@ -7,7 +7,6 @@ const matchRoutes = require('./routes/matchRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const config = require('./config');
 
-// Commented to trigger workflow run - 3
 const app = express();
 
 // Middleware
@@ -93,7 +92,14 @@ app.use((err, req, res, next) => {
 app.get('/', (req, res) => res.send('V!B3 API running'));
 
 // Connect to DB and start server
-const PORT = process.env.PORT || 5000;
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+const PORT = config.port || 5000;
+
+if (process.env.NODE_ENV !== 'test') {
+  connectDB().then(() => {
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  });
+}
+
+module.exports = app;

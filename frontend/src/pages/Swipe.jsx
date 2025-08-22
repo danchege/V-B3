@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -8,7 +8,7 @@ import Modal from '../components/Modal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmojiPicker from '../components/EmojiPicker';
 import { api, handleApiError } from '../utils/api';
-import { sendMessage as sendMessageApi, getMessages as getMessagesApi } from '../services/chatService';
+import { getMessages as getMessagesApi } from '../services/chatService';
 
 const Swipe = () => {
   const { user: currentUser } = useAuth();
@@ -20,12 +20,11 @@ const Swipe = () => {
   const [directMessages, setDirectMessages] = useState({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   
   // Fetch potential matches from the backend
-  const fetchPotentialMatches = async () => {
+  const fetchPotentialMatches = useCallback(async () => {
     try {
       console.log('Fetching potential matches...');
       setError(null);
@@ -172,7 +171,7 @@ const Swipe = () => {
     };
     
     loadData();
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, fetchPotentialMatches]);
   
   const user = users[index];
 

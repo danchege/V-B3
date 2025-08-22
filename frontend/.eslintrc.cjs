@@ -26,13 +26,29 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
-    'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    'no-unused-vars': ['warn', { 
+      argsIgnorePattern: '^_', 
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_',
+      destructuredArrayIgnorePattern: '^_'
+    }],
     'react-refresh/only-export-components': 'warn',
   },
+  ignores: [
+    '**/dist/**',
+    '**/node_modules/**',
+    '**/*.config.js',
+    '**/*.config.cjs',
+    '**/tailwind.config.js',
+    '**/postcss.config.js',
+    '**/vite.config.js',
+    '**/*.test.js',
+    '**/*.spec.js'
+  ],
   overrides: [
     // Configuration files
     {
-      files: ['*.js', '*.cjs'],
+      files: ['*.js', '*.cjs', '*.mjs'],
       env: {
         node: true,
       },
