@@ -1,4 +1,7 @@
-export default {
+// @ts-check
+
+/** @type {import('postcss-load-config').Config} */
+const config = {
   plugins: {
     'postcss-import': {},
     'tailwindcss/nesting': {},
@@ -7,4 +10,6 @@ export default {
     // Only minify in production
     ...(process.env.NODE_ENV === 'production' ? { cssnano: {} } : {})
   }
-}
+};
+
+export default config;

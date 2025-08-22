@@ -1,8 +1,14 @@
+// @ts-check
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
-export default defineConfig(({ command, mode }) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+/** @type {import('vite').UserConfigExport} */
+export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   
   return {
@@ -22,8 +28,10 @@ export default defineConfig(({ command, mode }) => {
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: (assetInfo) => {
+            if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
+            
             const info = assetInfo.name.split('.');
-            const ext = info[info.length - 1].toLowerCase();
+            const ext = info[info.length - 1]?.toLowerCase() || '';
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
               return 'assets/images/[name]-[hash][extname]';
             }

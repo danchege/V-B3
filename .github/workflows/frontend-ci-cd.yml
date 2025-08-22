@@ -47,7 +47,7 @@ jobs:
 
     - name: Run linting
       working-directory: ./frontend
-      run: pnpm run lint
+      run: pnpm eslint . --config .eslintrc.mjs
 
     - name: Run tests
       working-directory: ./frontend

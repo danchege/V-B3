@@ -71,7 +71,7 @@ const ProfileSetup = () => {
           const userData = response.data.data;
           console.log('Profile data received:', userData);
           
-          setFormData(_prev => ({
+          setFormData(prev => ({
             name: userData.name || '',
             age: userData.age || '',
             bio: userData.bio || '',

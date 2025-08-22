@@ -1,5 +1,7 @@
+// @ts-check
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -14,4 +16,6 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};
+
+export default config;
