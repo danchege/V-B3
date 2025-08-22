@@ -1,3 +1,4 @@
+// Triggering backend CI/CD workflow
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./utils/dbConnect');
