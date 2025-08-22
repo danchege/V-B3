@@ -41,18 +41,17 @@ jobs:
         # Always use --no-frozen-lockfile in CI to handle missing lockfiles
         pnpm install --no-frozen-lockfile
 
-    - name: Install ESLint if needed
+    - name: Install testing dependencies
       working-directory: ./frontend
-      run: pnpm add -D eslint
+      run: pnpm add -D eslint vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event
 
     - name: Run linting
       working-directory: ./frontend
-      run: pnpm eslint . --config .eslintrc.cjs
+      run: pnpm run lint
 
     - name: Run tests
       working-directory: ./frontend
-      run: |
-        pnpm test
+      run: pnpm test
 
     - name: Build application
       working-directory: ./frontend

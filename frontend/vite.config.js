@@ -8,13 +8,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /** @type {import('vite').UserConfigExport} */
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const isProduction = mode === 'production';
   
   return {
     plugins: [react()],
     base: isProduction ? '/' : '/',
     publicDir: 'public',
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.js',
+      css: true,
+    },
     build: {
       outDir: 'dist',
       assetsDir: 'assets',
