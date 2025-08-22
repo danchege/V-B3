@@ -43,15 +43,16 @@ jobs:
 
     - name: Install testing dependencies
       working-directory: ./frontend
-      run: pnpm add -D eslint vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event
+      run: |
+        pnpm add -D eslint vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom @vitest/ui
 
     - name: Run linting
       working-directory: ./frontend
       run: pnpm run lint
 
-    - name: Run tests
+    - name: Run tests with coverage
       working-directory: ./frontend
-      run: pnpm test
+      run: pnpm test --coverage
 
     - name: Build application
       working-directory: ./frontend

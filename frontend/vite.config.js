@@ -20,6 +20,17 @@ export default defineConfig(({ mode, command }) => {
       environment: 'jsdom',
       setupFiles: './src/test/setup.js',
       css: true,
+      // Enable DOM testing
+      environmentOptions: {
+        jsdom: {
+          url: 'http://localhost:3000',
+        },
+      },
+      // Enable coverage reporting
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+      },
     },
     build: {
       outDir: 'dist',
