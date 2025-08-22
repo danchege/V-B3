@@ -81,7 +81,7 @@ const Swipe = () => {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  };
+  }, [navigate]);
 
   // Handle swipe action (like/dislike)
   const handleSwipe = async (liked) => {
