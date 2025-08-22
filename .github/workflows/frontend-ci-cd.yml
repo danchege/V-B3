@@ -52,7 +52,8 @@ jobs:
 
     - name: Run tests with coverage
       working-directory: ./frontend
-      run: pnpm run test:coverage
+      run: |
+        pnpm exec vitest run --coverage
 
     - name: Build application
       working-directory: ./frontend
