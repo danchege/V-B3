@@ -5,6 +5,6 @@ import App from '../src/App';
 describe('App', () => {
   it('renders without crashing', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Vite + React');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Find Your V!B3');
   });
 });
