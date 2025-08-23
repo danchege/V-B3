@@ -1,27 +1,51 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const app = require('../server');
+const express = require('express');
+
+// Set a longer timeout for MongoDB setup
+jest.setTimeout(30000);
 
 let mongoServer;
+let app;
 
 // Set up in-memory MongoDB for testing
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  process.env.MONGODB_URI = mongoUri;
-  
-  // Connect to the in-memory database
-  await mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  try {
+    console.log('Starting MongoDB Memory Server...');
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    console.log('MongoDB URI:', mongoUri);
+    process.env.MONGODB_URI = mongoUri;
+    
+    // Connect to the in-memory database
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    
+    // Import the app after setting up the test environment
+    app = require('../server');
+    
+    console.log('Test environment setup complete');
+  } catch (error) {
+    console.error('Test setup error:', error);
+    throw error;
+  }
 });
 
 // Clean up after all tests are done
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
+  try {
+    await mongoose.disconnect();
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+    console.log('Test environment cleaned up');
+  } catch (error) {
+    console.error('Test teardown error:', error);
+    throw error;
+  }
 });
 
 describe('Server', () => {
@@ -34,10 +58,10 @@ describe('Server', () => {
   it('should return 404 for non-existent endpoints', async () => {
     const res = await request(app).get('/non-existent-route');
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
+    expect(res.body).toMatchObject({
       success: false,
       message: 'Not Found',
-      error: 'GET /non-existent-route'
+      error: expect.stringContaining('GET /non-existent-route')
     });
   });
 

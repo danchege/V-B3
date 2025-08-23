@@ -30,6 +30,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('V!B3 API running');
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/match', matchRoutes);
