@@ -7,21 +7,16 @@
       "config": {
         "distDir": "dist"
       }
-    },
-    {
-      "src": "frontend/index.html",
-      "use": "@vercel/static"
     }
   ],
   "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://v-b3.onrender.com/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/index.html"
-    }
+    { "src": "/api/(.*)", "dest": "https://v-b3.onrender.com/api/$1" },
+    { "src": "/assets/(.*)", "dest": "/frontend/dist/assets/$1" },
+    { "src": "/(.*)", "dest": "/frontend/dist/index.html" }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/frontend/dist/index.html" }
   ]
 }
