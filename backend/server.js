@@ -15,14 +15,16 @@ const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    // Allow all origins in test environment, otherwise check against allowedOrigins
+    if (process.env.NODE_ENV === 'test' || !origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -32,6 +34,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/chat', chatRoutes);
+
+// 404 handler for unmatched routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: 'Not Found',
+    error: `Cannot ${req.method} ${req.originalUrl}`
+  });
+});
 
 // Enhanced error handling middleware
 app.use((err, req, res, next) => {
