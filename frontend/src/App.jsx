@@ -9,7 +9,7 @@ import Swipe from './pages/Swipe';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 
-// Commented to trigger workflow run - 4
+// Commented to trigger workflow run - 5 (Vercel deployment fix)
 const App = () => (
   <AuthProvider>
     <Router>
