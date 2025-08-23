@@ -5,13 +5,12 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "cleanDistDir": true
+        "distDir": "dist"
       }
     }
   ],
   "buildCommand": "cd frontend && npm install && npm run build",
-  "rootDirectory": ".",
+  "outputDirectory": "frontend/dist",
   "routes": [
     {
       "src": "/api/(.*)",
