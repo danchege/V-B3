@@ -56,6 +56,8 @@ jobs:
     - name: Install dependencies
       working-directory: ./backend
       run: |
+        pnpm install
+        pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
         # Always use --no-frozen-lockfile in CI to handle missing lockfiles
         pnpm install --no-frozen-lockfile
 
