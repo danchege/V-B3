@@ -5,7 +5,8 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist",
+        "cleanDistDir": true
       }
     }
   ],
@@ -13,6 +14,10 @@
     {
       "src": "/api/(.*)",
       "dest": "https://v-b3.onrender.com/api/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
       "src": "^/assets/(.*)",
@@ -23,7 +28,7 @@
       "dest": "/$1"
     },
     {
-      "src": "^/(.*)",
+      "src": "/[^.]*$",
       "dest": "/index.html"
     }
   ]

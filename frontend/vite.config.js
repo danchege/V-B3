@@ -13,8 +13,11 @@ export default defineConfig(({ mode, command }) => {
   
   return {
     plugins: [react()],
-    base: isProduction ? '/' : '/',
+    base: '/', // Always use root path for Vercel deployments
     publicDir: 'public',
+    define: {
+      'process.env': process.env, // Pass through environment variables
+    },
     test: {
       globals: true,
       environment: 'jsdom',
@@ -39,6 +42,12 @@ export default defineConfig(({ mode, command }) => {
       sourcemap: isProduction ? 'hidden' : true,
       minify: isProduction ? 'esbuild' : false,
       chunkSizeWarningLimit: 1000, // Increase chunk size warning limit
+      reportCompressedSize: false, // Disable gzip size reporting for slightly faster build
+      cssCodeSplit: true, // Enable CSS code splitting
+      target: 'esnext', // Target modern browsers
+      commonjsOptions: {
+        include: /node_modules/,
+      },
       rollupOptions: {
         input: {
           main: resolve(__dirname, 'index.html'),
@@ -87,8 +96,11 @@ export default defineConfig(({ mode, command }) => {
       },
     },
     server: {
+      host: true,
       port: 3000,
-      open: true,
+      strictPort: true,
+      open: false,
+      cors: true
     },
     preview: {
       port: 3000,
