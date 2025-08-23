@@ -36,12 +36,29 @@ export default defineConfig(({ mode, command }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       emptyOutDir: true,
-      sourcemap: true,
+      sourcemap: isProduction ? 'hidden' : true,
+      minify: isProduction ? 'esbuild' : false,
+      chunkSizeWarningLimit: 1000, // Increase chunk size warning limit
       rollupOptions: {
         input: {
           main: resolve(__dirname, 'index.html'),
         },
         output: {
+          manualChunks: (id) => {
+            // Split node_modules into separate chunks
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                return 'vendor-react';
+              }
+              if (id.includes('@chakra-ui')) {
+                return 'vendor-chakra';
+              }
+              if (id.includes('framer-motion')) {
+                return 'vendor-framer';
+              }
+              return 'vendor';
+            }
+          },
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: (assetInfo) => {
