@@ -1,4 +1,4 @@
-// Triggering backend CI/CD workflow - Run 5 (ESLint fix)
+// Triggering backend CI/CD workflow - Run 6 (ESLint fix - updated workflow)
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./utils/dbConnect');

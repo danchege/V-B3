@@ -56,10 +56,14 @@ jobs:
     - name: Install dependencies
       working-directory: ./backend
       run: |
-        pnpm install
-        pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-        # Always use --no-frozen-lockfile in CI to handle missing lockfiles
-        pnpm install --no-frozen-lockfile
+        # Install all dependencies including devDependencies
+        pnpm install --prod=false --frozen-lockfile=false
+        
+        # Verify ESLint is installed
+        pnpm list eslint
+        
+        # Make sure node_modules/.bin is in PATH
+        echo "${{ github.workspace }}/backend/node_modules/.bin" >> $GITHUB_PATH
 
     - name: Run linting
       working-directory: ./backend
