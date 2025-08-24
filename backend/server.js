@@ -1,4 +1,4 @@
-// Triggering backend CI/CD workflow - Run 6 (ESLint fix - updated workflow)
+// Triggering backend CI/CD workflow - Run 7 (Vercel deployment fix - updated CORS)
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./utils/dbConnect');
