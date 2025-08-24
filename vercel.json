@@ -5,7 +5,8 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist",
+        "outputDirectory": "dist"
       }
     }
   ],
@@ -16,12 +17,15 @@
       "dest": "https://v-b3.onrender.com/api/$1"
     },
     {
-      "src": "^/assets/(.*)",
-      "dest": "/assets/$1"
+      "src": "/assets/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "dest": "/frontend/dist/assets/$1"
     },
     {
-      "src": "^/(.*)$",
-      "dest": "/index.html"
+      "src": "/(.*)",
+      "dest": "/frontend/dist/index.html"
     }
   ]
 }
