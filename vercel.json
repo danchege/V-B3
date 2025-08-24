@@ -2,14 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/dist/**/*",
-      "use": "@vercel/static"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist",
+        "installCommand": "cd frontend && pnpm install",
+        "buildCommand": "cd frontend && pnpm run build"
+      }
     }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "https://v-b3.onrender.com/api/$1" },
     { "src": "/assets/(.*)", "headers": { "cache-control": "public, max-age=31536000, immutable" } },
     { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
