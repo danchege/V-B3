@@ -16,9 +16,11 @@ export default defineConfig(({ mode, command }) => {
     base: '/',
     publicDir: 'public',
     server: {
+      host: true,
       port: 3000,
       strictPort: true,
-      open: true
+      open: false,
+      cors: true
     },
     define: {
       'process.env': process.env, // Pass through environment variables
@@ -100,13 +102,7 @@ export default defineConfig(({ mode, command }) => {
         },
       },
     },
-    server: {
-      host: true,
-      port: 3000,
-      strictPort: true,
-      open: false,
-      cors: true
-    },
+
     preview: {
       port: 3000,
       open: true,
