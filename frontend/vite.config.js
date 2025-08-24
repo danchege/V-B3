@@ -18,6 +18,7 @@ export default defineConfig(({ mode, command }) => {
     server: {
       port: 3000,
       strictPort: true,
+      open: true
     },
     define: {
       'process.env': process.env, // Pass through environment variables
