@@ -10,7 +10,14 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   
   return {
-    plugins: [react()],
+    plugins: [
+      react({
+        jsxImportSource: '@emotion/react',
+        babel: {
+          plugins: ['@emotion/babel-plugin'],
+        },
+      }),
+    ],
     base: isProduction ? '/' : '/',
     publicDir: 'public',
     build: {
@@ -19,6 +26,9 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       sourcemap: isProduction ? false : true,
       manifest: true,
+      commonjsOptions: {
+        include: /node_modules/,
+      },
       rollupOptions: {
         input: {
           main: resolve(__dirname, 'index.html')
