@@ -13,8 +13,12 @@ export default defineConfig(({ mode, command }) => {
   
   return {
     plugins: [react()],
-    base: '/', // Always use root path for Vercel deployments
+    base: '/',
     publicDir: 'public',
+    server: {
+      port: 3000,
+      strictPort: true,
+    },
     define: {
       'process.env': process.env, // Pass through environment variables
     },
