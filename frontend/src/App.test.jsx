@@ -1,17 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import App from './App';
+import Home from './pages/Home';
 
 describe('App', () => {
-  it('renders without crashing', () => {
+  it('renders home page without crashing', () => {
     render(
       <MemoryRouter>
-        <App />
+        <Home />
       </MemoryRouter>
     );
-    // This is a simple test that just checks if the app renders
-    // You can add more specific tests as needed
+    // Check if the main heading renders
     expect(screen.getByRole('main')).toBeInTheDocument();
+    expect(screen.getByText(/Find Your V!B3/i)).toBeInTheDocument();
   });
 });
