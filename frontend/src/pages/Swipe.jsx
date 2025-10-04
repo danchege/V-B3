@@ -20,6 +20,7 @@ const Swipe = () => {
   const [directMessages, setDirectMessages] = useState({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   

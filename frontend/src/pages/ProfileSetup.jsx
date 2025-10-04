@@ -64,7 +64,7 @@ const ProfileSetup = () => {
         console.log('Using token for profile fetch:', token ? 'Token exists' : 'No token found');
         
         // Use the correct endpoint path
-        const response = await api.get('/users/me');
+        const response = await api.get('/user/me');
         console.log('Profile API response:', response.data);
         
         if (response.data && response.data.data) {
@@ -216,7 +216,7 @@ const ProfileSetup = () => {
         }
       };
 
-      const { data } = await api.put('/users/me', updatedFormData);
+      const { data } = await api.put('/user/me', updatedFormData);
       
       // Update auth context with new user data
       if (updateUser) {
