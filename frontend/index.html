@@ -136,14 +136,16 @@
         setTimeout(function() {
           const root = document.getElementById('root');
           const errorContainer = document.getElementById('error-container');
+          console.log('Timeout check - Root children count:', root?.children?.length);
+          console.log('Root innerHTML:', root?.innerHTML);
           if (root && root.children.length === 0 && errorContainer) {
             errorContainer.style.display = 'block';
             const details = document.getElementById('error-details');
             if (details) {
-              details.textContent = 'The application is taking longer than expected to load. Please check your internet connection and try again.';
+              details.textContent = 'The application is taking longer than expected to load. Check the browser console for errors.';
             }
           }
-        }, 5000); // 5 second timeout
+        }, 10000); // 10 second timeout - increased for debugging
       });
     </script>
   </body>

@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+console.log('🚀 main.jsx is executing');
+
 // Function to display error in the error container
 function displayError(error) {
-  console.error('Application error:', error);
+  console.error('❌ Application error:', error);
   const errorContainer = document.getElementById('error-container');
   const errorDetails = document.getElementById('error-details');
   
@@ -63,17 +65,30 @@ class ErrorBoundary extends React.Component {
 }
 
 // Main render function
+let rootInstance = null;
+
 function renderApp() {
   try {
-    const root = createRoot(document.getElementById('root'));
-    root.render(
+    console.log('📦 Creating root...');
+    const rootElement = document.getElementById('root');
+    console.log('📍 Root element:', rootElement);
+    
+    if (!rootInstance) {
+      rootInstance = createRoot(rootElement);
+      console.log('✅ Root created');
+    }
+    
+    console.log('🎨 Rendering App...');
+    rootInstance.render(
       <React.StrictMode>
         <ErrorBoundary>
           <App />
         </ErrorBoundary>
       </React.StrictMode>
     );
+    console.log('✅ App rendered successfully');
   } catch (error) {
+    console.error('💥 Error in renderApp:', error);
     displayError(error);
   }
 }
