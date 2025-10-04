@@ -11,7 +11,11 @@ const config = require('./config');
 const app = express();
 
 // Middleware
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173', 
+  'http://localhost:5174'
+];
 
 const corsOptions = {
   origin: function (origin, callback) {
