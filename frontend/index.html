@@ -138,14 +138,22 @@
           const errorContainer = document.getElementById('error-container');
           console.log('Timeout check - Root children count:', root?.children?.length);
           console.log('Root innerHTML:', root?.innerHTML);
+          
+          // Only show error if root is completely empty (no children at all)
           if (root && root.children.length === 0 && errorContainer) {
-            errorContainer.style.display = 'block';
+            console.error('❌ App failed to render - showing error container');
+            errorContainer.style.display = 'flex';
             const details = document.getElementById('error-details');
             if (details) {
               details.textContent = 'The application is taking longer than expected to load. Check the browser console for errors.';
             }
+          } else {
+            console.log('✅ App loaded successfully, hiding error container');
+            if (errorContainer) {
+              errorContainer.style.display = 'none';
+            }
           }
-        }, 10000); // 10 second timeout - increased for debugging
+        }, 3000); // 3 second timeout
       });
     </script>
   </body>
