@@ -97,7 +97,7 @@ const UserSchema = new mongoose.Schema({
       values: ['male', 'female', 'non-binary', 'prefer not to say'],
       message: 'Please select a valid gender'
     },
-    required: [true, 'Gender is required']
+    required: false // Allow registration without gender, can be set during profile setup
   },
   interests: [{ 
     type: String,
