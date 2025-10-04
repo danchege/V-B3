@@ -18,6 +18,11 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, './src'),
+      },
+    },
     base: isProduction ? '/' : '/',
     publicDir: 'public',
     build: {
