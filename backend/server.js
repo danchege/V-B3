@@ -1,4 +1,4 @@
-// Triggering backend CI/CD workflow - Run 7 (Vercel deployment fix - updated CORS)
+// Triggering backend CI/CD workflow - Run 8 (Cloudinary env vars added to Render)
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./utils/dbConnect');
