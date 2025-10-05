@@ -105,7 +105,12 @@ exports.getMatches = async (req, res) => {
     if (!currentUser.preferences || !currentUser.location || !currentUser.location.coordinates) {
       return res.status(400).json({
         success: false,
-        message: 'Please complete your profile and set your location to find matches'
+        message: 'Please complete your profile and set your location to find matches',
+        profileIncomplete: true,
+        missingFields: {
+          preferences: !currentUser.preferences,
+          location: !currentUser.location || !currentUser.location.coordinates
+        }
       });
     }
 

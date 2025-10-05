@@ -23,6 +23,7 @@ const Swipe = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
   
   // Fetch potential matches from the backend
   const fetchPotentialMatches = useCallback(async () => {
@@ -66,12 +67,13 @@ const Swipe = () => {
       let errorMessage = apiError.message || 'Failed to load potential matches. Please try again later.';
       
       // Handle specific error cases
-      if (apiError.status === 400) {
+      if (apiError.status === 400 && apiError.response?.requiresProfileSetup) {
         errorMessage = 'Please complete your profile to see matches.';
         console.log('Redirecting to profile setup due to incomplete profile');
-        setTimeout(() => {
-          navigate('/profile-setup');
-        }, 2000);
+        setProfileIncomplete(true);
+        // Immediate redirect instead of timeout to prevent repeated calls
+        navigate('/profile-setup');
+        return;
       } else if (apiError.status === 401) {
         // The interceptor will handle the redirect for 401
         return;
@@ -166,13 +168,18 @@ const Swipe = () => {
       return;
     }
     
+    // Don't fetch if we already know the profile is incomplete
+    if (profileIncomplete) {
+      return;
+    }
+    
     const loadData = async () => {
       setIsLoading(true);
       await fetchPotentialMatches();
     };
     
     loadData();
-  }, [currentUser, navigate, fetchPotentialMatches]);
+  }, [currentUser, navigate, fetchPotentialMatches, profileIncomplete]);
   
   const user = users[index];
 

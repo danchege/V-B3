@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PhotoUpload from '../components/PhotoUpload';
 import { api, handleApiError } from '../utils/api';
 
 // Function to get coordinates from city and country using OpenStreetMap Nominatim API
@@ -52,7 +53,6 @@ const ProfileSetup = () => {
       gender: []
     }
   });
-  const [newPhoto, setNewPhoto] = useState('');
   const [newInterest, setNewInterest] = useState('');
 
   // Fetch user profile data if editing
@@ -143,23 +143,6 @@ const ProfileSetup = () => {
     }
   };
 
-  const handleAddPhoto = (e) => {
-    e.preventDefault();
-    if (newPhoto && !formData.photos.includes(newPhoto)) {
-      setFormData(prev => ({
-        ...prev,
-        photos: [...prev.photos, newPhoto]
-      }));
-      setNewPhoto('');
-    }
-  };
-
-  const handleRemovePhoto = (photoToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      photos: prev.photos.filter(photo => photo !== photoToRemove)
-    }));
-  };
 
   const handleAddInterest = (e) => {
     e.preventDefault();
@@ -192,20 +175,19 @@ const ProfileSetup = () => {
       return;
     }
 
-    // Add geocoding for location
+    // Add geocoding for location (optional - fallback to default coordinates)
     try {
+      console.log('Attempting to get coordinates for:', formData.location.city, formData.location.country);
       const coordinates = await getCoordinates(formData.location.city, formData.location.country);
-      if (!coordinates) {
-        throw new Error('Could not find coordinates for the provided location. Please check the city and country names.');
-      }
+      console.log('Geocoding result:', coordinates);
 
-      // Update form data with coordinates
+      // Update form data with coordinates (use default if geocoding failed)
       const updatedFormData = {
         ...formData,
         location: {
           ...formData.location,
           type: 'Point',
-          coordinates: coordinates.coordinates
+          coordinates: coordinates ? coordinates.coordinates : [0, 0] // Default coordinates if geocoding fails
         },
         // Ensure preferences.gender is an array for the backend
         preferences: {
@@ -216,7 +198,9 @@ const ProfileSetup = () => {
         }
       };
 
+      console.log('Sending profile update:', updatedFormData);
       const { data } = await api.put('/user/me', updatedFormData);
+      console.log('Profile update response:', data);
       
       // Update auth context with new user data
       if (updateUser) {
@@ -227,6 +211,7 @@ const ProfileSetup = () => {
       navigate('/swipe');
     } catch (err) {
       console.error('Error updating profile:', err);
+      console.error('Error details:', err.response?.data);
       setError(err.response?.data?.message || err.message || 'Failed to update profile. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -324,45 +309,16 @@ const ProfileSetup = () => {
 
               {/* Photos Section */}
               <section className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Photos</h2>
-                
-                <div className="flex flex-wrap gap-4 mb-4">
-                  {formData.photos.map((photo, index) => (
-                    <div key={index} className="relative group">
-                      <img 
-                        src={photo} 
-                        alt={`Profile ${index + 1}`}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePhoto(photo)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    value={newPhoto}
-                    onChange={(e) => setNewPhoto(e.target.value)}
-                    placeholder="Paste photo URL"
-                    className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink focus:border-transparent"
-                  />
-                  <Button 
-                    type="button"
-                    onClick={handleAddPhoto}
-                    disabled={!newPhoto}
-                    className="px-4 py-2"
-                  >
-                    Add Photo
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-500">Add at least one photo to complete your profile</p>
+                <PhotoUpload 
+                  photos={formData.photos}
+                  onPhotosUpdate={(newPhotos) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      photos: newPhotos
+                    }));
+                  }}
+                  maxPhotos={6}
+                />
               </section>
 
               {/* Interests Section */}

@@ -1,0 +1,132 @@
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+/**
+ * Upload image to Cloudinary
+ * @param {string} filePath - Path to the file to upload
+ * @param {string} folder - Cloudinary folder to upload to
+ * @returns {Promise<Object>} - Cloudinary upload result
+ */
+const uploadImage = async (filePath, folder = 'vib3/profiles') => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: folder,
+      transformation: [
+        { width: 800, height: 800, crop: 'fill', quality: 'auto' },
+        { format: 'webp' } // Convert to WebP for better compression
+      ],
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+    });
+    
+    return {
+      success: true,
+      url: result.secure_url,
+      publicId: result.public_id,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      bytes: result.bytes
+    };
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Upload image from buffer (for memory uploads)
+ * @param {Buffer} buffer - Image buffer
+ * @param {string} folder - Cloudinary folder to upload to
+ * @returns {Promise<Object>} - Cloudinary upload result
+ */
+const uploadImageFromBuffer = async (buffer, folder = 'vib3/profiles') => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      {
+        folder: folder,
+        transformation: [
+          { width: 800, height: 800, crop: 'fill', quality: 'auto' },
+          { format: 'webp' }
+        ],
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload error:', error);
+          resolve({
+            success: false,
+            error: error.message
+          });
+        } else {
+          resolve({
+            success: true,
+            url: result.secure_url,
+            publicId: result.public_id,
+            width: result.width,
+            height: result.height,
+            format: result.format,
+            bytes: result.bytes
+          });
+        }
+      }
+    ).end(buffer);
+  });
+};
+
+/**
+ * Delete image from Cloudinary
+ * @param {string} publicId - Cloudinary public ID of the image
+ * @returns {Promise<Object>} - Deletion result
+ */
+const deleteImage = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return {
+      success: result.result === 'ok',
+      result: result.result
+    };
+  } catch (error) {
+    console.error('Cloudinary delete error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Generate optimized image URL with transformations
+ * @param {string} publicId - Cloudinary public ID
+ * @param {Object} options - Transformation options
+ * @returns {string} - Optimized image URL
+ */
+const getOptimizedImageUrl = (publicId, options = {}) => {
+  const defaultOptions = {
+    width: 400,
+    height: 400,
+    crop: 'fill',
+    quality: 'auto',
+    format: 'webp'
+  };
+  
+  const transformOptions = { ...defaultOptions, ...options };
+  
+  return cloudinary.url(publicId, transformOptions);
+};
+
+module.exports = {
+  cloudinary,
+  uploadImage,
+  uploadImageFromBuffer,
+  deleteImage,
+  getOptimizedImageUrl
+};

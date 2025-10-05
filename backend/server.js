@@ -14,13 +14,29 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173', 
-  'http://localhost:5174'
+  'http://localhost:5174',
+  'http://127.0.0.1:42533'  // Browser preview proxy
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow all origins in test environment, otherwise check against allowedOrigins
-    if (process.env.NODE_ENV === 'test' || !origin || allowedOrigins.indexOf(origin) !== -1) {
+    // Allow all origins in test environment
+    if (process.env.NODE_ENV === 'test' || !origin) {
+      callback(null, true);
+      return;
+    }
+    
+    // In development, allow localhost and 127.0.0.1 with any port
+    if (process.env.NODE_ENV !== 'production') {
+      const isLocalhost = origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/);
+      if (isLocalhost || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+        return;
+      }
+    }
+    
+    // In production, only allow specific origins
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

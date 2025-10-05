@@ -61,7 +61,6 @@ exports.getProfile = async (req, res) => {
       console.log(`[${requestId}] Executing database query...`);
       const user = await User.findById(userId)
         .select('-password -__v')
-        .populate('matches', 'name photos')
         .lean()
         .catch(err => {
           console.error(`[${requestId}] Database query error:`, {
@@ -90,7 +89,7 @@ exports.getProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         hasPhotos: user.photos && user.photos.length > 0,
-        matchesCount: user.matches ? user.matches.length : 0,
+        profileComplete: user.profileComplete,
         location: user.location ? 'Present' : 'Missing',
         preferences: user.preferences ? 'Present' : 'Missing'
       });

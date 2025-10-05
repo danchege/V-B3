@@ -1,8 +1,17 @@
 import React from 'react';
+import OptimizedImage from './OptimizedImage';
 
 const Card = ({ user, children, onText }) => (
   <div className="bg-white rounded-xl shadow-lg p-6 max-w-xs mx-auto border-2 border-maroon">
-    <img src={user?.photos?.[0] || '/default-avatar.png'} alt={user?.name} className="w-32 h-32 object-cover rounded-full mx-auto border-4 border-pink" />
+    <div className="w-32 h-32 mx-auto border-4 border-pink rounded-full overflow-hidden">
+      <OptimizedImage 
+        src={user?.photos?.[0] || 'https://via.placeholder.com/200?text=No+Photo'} 
+        alt={user?.name} 
+        width={128}
+        height={128}
+        className="w-full h-full object-cover"
+      />
+    </div>
     <h2 className="text-xl font-bold text-maroon mt-4 text-center">{user?.name}</h2>
     <p className="text-pink text-center">{user?.bio}</p>
     <div className="mt-2 flex flex-wrap justify-center gap-2">
