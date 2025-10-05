@@ -48,8 +48,7 @@ const uploadImage = async (filePath, folder = 'vib3/profiles') => {
  * @param {string} folder - Cloudinary folder to upload to
  * @returns {Promise<Object>} - Cloudinary upload result
  */
-const uploadImageFromBuffer = async (buffer, folder = 'vib3/profiles') => {
-  return new Promise((resolve, reject) => {
+const uploadImageFromBuffer = async (buffer, folder = 'vib3/profiles') => new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
       {
         folder: folder,
@@ -80,7 +79,6 @@ const uploadImageFromBuffer = async (buffer, folder = 'vib3/profiles') => {
       }
     ).end(buffer);
   });
-};
 
 /**
  * Delete image from Cloudinary
