@@ -1,5 +1,5 @@
 {
-  "_comment": "Test Vercel deployment fix",
+  "_comment": "Retry deployment after timeout",
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
