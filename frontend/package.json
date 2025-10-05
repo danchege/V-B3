@@ -1,5 +1,5 @@
 {
-  "_comment": "Trigger frontend workflow",
+  "_comment": "Test Vercel deployment fix",
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
