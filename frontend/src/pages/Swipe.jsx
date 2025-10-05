@@ -133,7 +133,7 @@ const Swipe = () => {
         }
       } else {
         // Handle dislike - just log it
-        await api.post('/api/matches/swipe', {
+        await api.post('/match/swipe', {
           targetUserId: currentUserProfile._id,
           liked: false
         });

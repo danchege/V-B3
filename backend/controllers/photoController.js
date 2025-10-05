@@ -30,6 +30,16 @@ exports.uploadPhoto = async (req, res) => {
   console.log(`\n=== [${requestId}] POST /api/user/photos ===`);
   
   try {
+    // Check Cloudinary configuration
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      console.error(`[${requestId}] Cloudinary configuration missing`);
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured',
+        error: 'Missing Cloudinary configuration'
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         success: false,

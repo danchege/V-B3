@@ -102,14 +102,22 @@ exports.getMatches = async (req, res) => {
     }
 
     // 2. Check if user has set up their profile
-    if (!currentUser.preferences || !currentUser.location || !currentUser.location.coordinates) {
+    const hasPreferences = currentUser.preferences && 
+                          currentUser.preferences.gender && 
+                          currentUser.preferences.gender.length > 0;
+    const hasLocation = currentUser.location && 
+                       currentUser.location.coordinates && 
+                       currentUser.location.coordinates.length === 2;
+    
+    if (!hasPreferences || !hasLocation) {
       return res.status(400).json({
         success: false,
         message: 'Please complete your profile and set your location to find matches',
         profileIncomplete: true,
+        requiresProfileSetup: true,
         missingFields: {
-          preferences: !currentUser.preferences,
-          location: !currentUser.location || !currentUser.location.coordinates
+          preferences: !hasPreferences,
+          location: !hasLocation
         }
       });
     }
@@ -134,13 +142,16 @@ exports.getMatches = async (req, res) => {
     const matchQuery = {
       _id: { $nin: excludedUserIds },
       _id: { $ne: req.user.id }, // Don't match with self
-      'preferences.gender': { 
-        $in: currentUser.preferences.lookingFor || ['male', 'female', 'non-binary'] 
-      },
-      gender: { 
-        $in: currentUser.preferences.gender || ['male', 'female', 'non-binary'] 
-      }
+      // Only match users who have completed their profiles
+      profileComplete: true,
+      gender: { $exists: true, $ne: null },
+      'location.coordinates': { $exists: true }
     };
+
+    // Add gender preferences if available
+    if (currentUser.preferences && currentUser.preferences.gender) {
+      matchQuery.gender = { $in: currentUser.preferences.gender };
+    }
 
     // 6. Add location-based filtering if coordinates exist
     if (currentUser.location && 
