@@ -15,7 +15,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173', 
   'http://localhost:5174',
-  'http://127.0.0.1:42533'  // Browser preview proxy
+  'http://127.0.0.1:42533',  // Browser preview proxy
+  'https://vib3-inky.vercel.app'  // Production Vercel deployment
 ];
 
 const corsOptions = {
