@@ -10,6 +10,12 @@ const config = require('./config');
 
 const app = express();
 
+// Add request logging middleware first
+app.use((req, res, next) => {
+  console.log(`REQUEST: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // Middleware
 const allowedOrigins = [
   'http://localhost:3000',
@@ -49,6 +55,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Serve static files for local photo uploads
+app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.get('/', (req, res) => {

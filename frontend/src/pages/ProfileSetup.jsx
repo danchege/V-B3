@@ -317,7 +317,7 @@ const ProfileSetup = () => {
                       photos: newPhotos
                     }));
                   }}
-                  maxPhotos={6}
+                  maxPhotos={3}
                 />
               </section>
 

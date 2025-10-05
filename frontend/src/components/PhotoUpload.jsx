@@ -3,7 +3,7 @@ import { Upload, X, Camera, Image as ImageIcon } from 'lucide-react';
 import { api } from '../utils/api';
 import OptimizedImage from './OptimizedImage';
 
-const PhotoUpload = ({ photos = [], onPhotosUpdate, maxPhotos = 6 }) => {
+const PhotoUpload = ({ photos = [], onPhotosUpdate, maxPhotos = 3 }) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);

@@ -31,7 +31,18 @@ exports.uploadPhoto = async (req, res) => {
   
   try {
     // Check Cloudinary configuration
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    const hasCloudinaryConfig = process.env.CLOUDINARY_CLOUD_NAME && 
+                                process.env.CLOUDINARY_API_KEY && 
+                                process.env.CLOUDINARY_API_SECRET;
+    
+    console.log(`[${requestId}] Cloudinary config check:`, {
+      cloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: !!process.env.CLOUDINARY_API_KEY,
+      apiSecret: !!process.env.CLOUDINARY_API_SECRET,
+      hasConfig: hasCloudinaryConfig
+    });
+    
+    if (!hasCloudinaryConfig) {
       console.error(`[${requestId}] Cloudinary configuration missing`);
       return res.status(500).json({
         success: false,
@@ -55,6 +66,7 @@ exports.uploadPhoto = async (req, res) => {
     });
 
     // Upload to Cloudinary
+    console.log(`[${requestId}] Starting Cloudinary upload...`);
     const uploadResult = await uploadImageFromBuffer(req.file.buffer, 'vib3/profiles');
     
     if (!uploadResult.success) {

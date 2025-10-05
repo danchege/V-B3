@@ -5,6 +5,8 @@ cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+  timeout: 60000, // 60 seconds timeout
+  secure: true
 });
 
 /**
@@ -48,37 +50,61 @@ const uploadImage = async (filePath, folder = 'vib3/profiles') => {
  * @param {string} folder - Cloudinary folder to upload to
  * @returns {Promise<Object>} - Cloudinary upload result
  */
-const uploadImageFromBuffer = async (buffer, folder = 'vib3/profiles') => new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      {
-        folder: folder,
-        transformation: [
-          { width: 800, height: 800, crop: 'fill', quality: 'auto' },
-          { format: 'webp' }
-        ],
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
-      },
-      (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          resolve({
-            success: false,
-            error: error.message
-          });
-        } else {
-          resolve({
-            success: true,
-            url: result.secure_url,
-            publicId: result.public_id,
-            width: result.width,
-            height: result.height,
-            format: result.format,
-            bytes: result.bytes
-          });
-        }
+const uploadImageFromBuffer = async (buffer, folder = 'vib3/profiles', retries = 3) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log(`Cloudinary upload attempt ${attempt}/${retries}`);
+      
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: folder,
+            transformation: [
+              { width: 800, height: 800, crop: 'fill', quality: 'auto' },
+              { format: 'webp' }
+            ],
+            allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+            timeout: 60000 // 60 seconds
+          },
+          (error, result) => {
+            if (error) {
+              console.error(`Cloudinary upload error (attempt ${attempt}):`, error);
+              reject(error);
+            } else {
+              console.log(`Cloudinary upload successful (attempt ${attempt})`);
+              resolve(result);
+            }
+          }
+        );
+        
+        uploadStream.end(buffer);
+      });
+
+      return {
+        success: true,
+        url: result.secure_url,
+        publicId: result.public_id,
+        width: result.width,
+        height: result.height,
+        format: result.format,
+        bytes: result.bytes
+      };
+
+    } catch (error) {
+      console.error(`Upload attempt ${attempt} failed:`, error.message);
+      
+      if (attempt === retries) {
+        return {
+          success: false,
+          error: `Upload failed after ${retries} attempts: ${error.message}`
+        };
       }
-    ).end(buffer);
-  });
+      
+      // Wait before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+};
 
 /**
  * Delete image from Cloudinary
